@@ -1,0 +1,74 @@
+const API_BASE = 'http://localhost:8080'
+
+async function handleResponse(res) {
+  const text = await res.text()
+  let data = null
+  try {
+    data = text ? JSON.parse(text) : null
+  } catch {
+    data = null
+  }
+
+  if (!res.ok) {
+    const message = (data && data.error) || res.statusText || 'Request failed'
+    throw new Error(message)
+  }
+
+  return data
+}
+
+export async function login(username, password) {
+  const res = await fetch(`${API_BASE}/users/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+  return handleResponse(res)
+}
+
+export async function getItems() {
+  const res = await fetch(`${API_BASE}/items`)
+  return handleResponse(res)
+}
+
+export async function addItemToCart(token, itemId) {
+  const res = await fetch(`${API_BASE}/carts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ item_id: itemId })
+  })
+  return handleResponse(res)
+}
+
+export async function getCarts(token) {
+  const res = await fetch(`${API_BASE}/carts`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return handleResponse(res)
+}
+
+export async function createOrder(token, cartId) {
+  const res = await fetch(`${API_BASE}/orders`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ cart_id: cartId })
+  })
+  return handleResponse(res)
+}
+
+export async function getOrders(token) {
+  const res = await fetch(`${API_BASE}/orders`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return handleResponse(res)
+}
